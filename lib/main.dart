@@ -20,28 +20,21 @@ class CustomAppointmentTapDetails extends StatefulWidget {
   State<StatefulWidget> createState() => AppointmentDetails();
 }
 
-List<String> colors = <String>[
-  'Pink',
-  'Blue',
-  'Wall Brown',
-  'Yellow',
-  'Default'
-];
-
 class AppointmentDetails extends State<CustomAppointmentTapDetails> {
-  CalendarController _controller = CalendarController();
-  String? _subjectText, _startTimeText, _endTimeText, _dateText, _timeDetails;
-  Color? headerColor, viewHeaderColor, calendarColor, defaultColor;
-
-  @override
-  void initState() {
-    _subjectText = '';
-    _startTimeText = '';
-    _endTimeText = '';
-    _dateText = '';
-    _timeDetails = '';
-    super.initState();
-  }
+  List<String> colors = <String>[
+    'Pink',
+    'Blue',
+    'Wall Brown',
+    'Yellow',
+    'Default'
+  ];
+  final CalendarController _controller = CalendarController();
+  String? _subjectText = '',
+      _startTimeText = '',
+      _endTimeText = '',
+      _dateText = '',
+      _timeDetails = '';
+  Color? headerColor, viewHeaderColor, calendarColor;
 
   @override
   Widget build(BuildContext context) {
