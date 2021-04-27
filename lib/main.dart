@@ -29,7 +29,7 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
     'Default'
   ];
   final CalendarController _controller = CalendarController();
-  String? _subjectText = '',
+  String _subjectText = '',
       _startTimeText = '',
       _endTimeText = '',
       _dateText = '',
@@ -89,7 +89,7 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
             Expanded(
               child: SfCalendar(
                 viewHeaderStyle:
-                    ViewHeaderStyle(backgroundColor: viewHeaderColor),
+                ViewHeaderStyle(backgroundColor: viewHeaderColor),
                 backgroundColor: calendarColor,
                 view: CalendarView.week,
                 controller: _controller,
@@ -117,7 +117,7 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
     if (details.targetElement == CalendarElement.appointment ||
         details.targetElement == CalendarElement.agenda) {
       final Meeting appointmentDetails = details.appointments![0];
-      _subjectText = appointmentDetails.eventName;
+      _subjectText = appointmentDetails.eventName!;
       _dateText = DateFormat('MMMM dd, yyyy')
           .format(appointmentDetails.from!)
           .toString();
@@ -218,10 +218,10 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
 class Meeting {
   Meeting(
       {this.eventName,
-      this.from,
-      this.to,
-      this.background,
-      this.isAllDay = false});
+        this.from,
+        this.to,
+        this.background,
+        this.isAllDay = false});
 
   String? eventName;
   DateTime? from;
