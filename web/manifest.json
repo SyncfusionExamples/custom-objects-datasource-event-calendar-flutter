@@ -1,11 +1,11 @@
 {
-    "name": "flutter_custom_appointment",
-    "short_name": "flutter_custom_appointment",
+    "name": "custom_objects_datasource",
+    "short_name": "custom_objects_datasource",
     "start_url": ".",
-    "display": "minimal-ui",
+    "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter application.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

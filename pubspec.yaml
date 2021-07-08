@@ -1,5 +1,5 @@
-name: flutter_custom_appointment
-description: A new Flutter application.
+name: custom_objects_datasource
+description: A new Flutter project.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  syncfusion_flutter_calendar: ^19.1.54+1
+  syncfusion_flutter_calendar: 19.2.44
   intl: ^0.17.0
 
 

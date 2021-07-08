@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 void main() => runApp(CustomAppointmentDetails());
@@ -21,152 +21,61 @@ class CustomAppointmentTapDetails extends StatefulWidget {
 }
 
 class AppointmentDetails extends State<CustomAppointmentTapDetails> {
-  List<String> colors = <String>[
-    'Pink',
-    'Blue',
-    'Wall Brown',
-    'Yellow',
-    'Default'
-  ];
-  final CalendarController _controller = CalendarController();
-  String _subjectText = '',
-      _startTimeText = '',
-      _endTimeText = '',
-      _dateText = '',
-      _timeDetails = '';
-  Color? headerColor, viewHeaderColor, calendarColor;
+  MeetingDataSource? _dataSource;
+
+  @override
+  void initState() {
+    _dataSource = getCalendarDataSource();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          actions: <Widget>[
-            PopupMenuButton<String>(
-              icon: Icon(Icons.color_lens),
-              itemBuilder: (BuildContext context) {
-                return colors.map((String choice) {
-                  return PopupMenuItem<String>(
-                    value: choice,
-                    child: Text(choice),
-                  );
-                }).toList();
-              },
-              onSelected: (String value) {
-                setState(() {
-                  if (value == 'Pink') {
-                    headerColor = const Color(0xFF09e8189);
-                    viewHeaderColor = const Color(0xFF0f3acb6);
-                    calendarColor = const Color(0xFF0ffe5d8);
-                  } else if (value == 'Blue') {
-                    headerColor = const Color(0xFF0007eff);
-                    viewHeaderColor = const Color(0xFF03aa4f6);
-                    calendarColor = const Color(0xFF0bae5ff);
-                  } else if (value == 'Wall Brown') {
-                    headerColor = const Color(0xFF0937c5d);
-                    viewHeaderColor = const Color(0xFF0e6d9b1);
-                    calendarColor = const Color(0xFF0d1d2d6);
-                  } else if (value == 'Yellow') {
-                    headerColor = const Color(0xFF0f7ed53);
-                    viewHeaderColor = const Color(0xFF0fff77f);
-                    calendarColor = const Color(0xFF0f7f2cc);
-                  } else if (value == 'Default') {
-                    headerColor = null;
-                    viewHeaderColor = null;
-                    calendarColor = null;
-                  }
-                });
-              },
+          body: SafeArea(
+            child: SfCalendar(
+              view: CalendarView.week,
+              monthViewSettings: MonthViewSettings(showAgenda: true),
+              dataSource: _dataSource,
+              onTap: calendarTapped,
             ),
-          ],
-          backgroundColor: headerColor,
-          centerTitle: true,
-          titleSpacing: 60,
-        ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: SfCalendar(
-                viewHeaderStyle:
-                ViewHeaderStyle(backgroundColor: viewHeaderColor),
-                backgroundColor: calendarColor,
-                view: CalendarView.week,
-                controller: _controller,
-                allowedViews: [
-                  CalendarView.day,
-                  CalendarView.week,
-                  CalendarView.workWeek,
-                  CalendarView.month,
-                  CalendarView.timelineDay,
-                  CalendarView.timelineWeek,
-                  CalendarView.timelineWorkWeek,
-                ],
-                monthViewSettings: MonthViewSettings(showAgenda: true),
-                dataSource: getCalendarDataSource(),
-                onTap: calendarTapped,
-              ),
-            ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 
   void calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.appointment ||
         details.targetElement == CalendarElement.agenda) {
-      final Meeting appointmentDetails = details.appointments![0];
-      _subjectText = appointmentDetails.eventName!;
-      _dateText = DateFormat('MMMM dd, yyyy')
-          .format(appointmentDetails.from!)
-          .toString();
-      _startTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.from!).toString();
-      _endTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.to!).toString();
-      if (appointmentDetails.isAllDay!) {
-        _timeDetails = 'All day';
+      Appointment? _appointment;
+      Meeting? _meeting;
+      if (details.appointments![0] is Appointment) {
+        _appointment = details.appointments![0];
       } else {
-        _timeDetails = '$_startTimeText - $_endTimeText';
+        _meeting = details.appointments![0];
       }
+
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Container(child: new Text('$_subjectText')),
-              content: Container(
-                height: 80,
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          '$_dateText',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(''),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(_timeDetails!,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 15)),
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              title: Container(child: new Text('Appointment details')),
+              content: Text(_appointment != null
+                  ? _appointment.subject +
+                  "\nId: " +
+                  _appointment.id.toString() +
+                  "\nRecurrenceId: " +
+                  _appointment.recurrenceId.toString() +
+                  "\nAppointment type: " +
+                  _appointment.appointmentType.toString()
+                  : _meeting!.eventName +
+                  "\nId: " +
+                  _meeting.id.toString() +
+                  "\nRecurrenceId: " +
+                  _meeting.recurrenceId.toString()),
               actions: <Widget>[
-                new FlatButton(
+                new TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -174,41 +83,60 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
               ],
             );
           });
+
+      /// To get the parent appointment of the recurrence appointment in the
+      /// custom object type, we can handle this with id of the appointment.
+      if (_appointment != null) {
+        for (int i = 0; i < _dataSource!.appointments!.length; i++) {
+          if (_appointment.id == _dataSource!.appointments![i].id) {
+            _meeting = _dataSource!.appointments![i];
+          }
+        }
+      }
     }
   }
 
   MeetingDataSource getCalendarDataSource() {
     List<Meeting> appointments = <Meeting>[];
-    appointments.add(Meeting(
-      from: DateTime.now(),
-      to: DateTime.now().add(const Duration(hours: 1)),
-      eventName: 'Meeting',
+    final DateTime exceptionDate = DateTime(2021, 07, 20);
+
+    final Meeting normalAppointment = Meeting(
+      from: DateTime(2021, 07, 10, 10),
+      to: DateTime(2021, 07, 10, 12),
+      eventName: 'Planning',
+      id: '01',
       background: Colors.pink,
-      isAllDay: true,
-    ));
+    );
+
+    appointments.add(normalAppointment);
+    final Meeting recurrenceApp = Meeting(
+      from: DateTime(2021, 07, 11, 10),
+      to: DateTime(2021, 07, 11, 12),
+      eventName: 'Planning',
+      id: '02',
+      background: Colors.green,
+      recurrenceRule: 'FREQ=DAILY;COUNT=20',
+      exceptionDates: <DateTime>[exceptionDate],
+    );
+
+    appointments.add(recurrenceApp);
+
+    final Meeting exceptionAppointment = Meeting(
+        from: exceptionDate.add(const Duration(hours: 14)),
+        to: exceptionDate.add(const Duration(hours: 15)),
+        eventName: 'Changed occurence',
+        id: '03',
+        background: Colors.pinkAccent,
+        recurrenceId: recurrenceApp.id);
+
+    appointments.add(exceptionAppointment);
+
     appointments.add(Meeting(
       from: DateTime.now().add(const Duration(hours: 4, days: -1)),
       to: DateTime.now().add(const Duration(hours: 5, days: -1)),
       eventName: 'Release Meeting',
+      id: '04',
       background: Colors.lightBlueAccent,
-    ));
-    appointments.add(Meeting(
-      from: DateTime.now().add(const Duration(hours: 2, days: -2)),
-      to: DateTime.now().add(const Duration(hours: 4, days: -2)),
-      eventName: 'Performance check',
-      background: Colors.amber,
-    ));
-    appointments.add(Meeting(
-      from: DateTime.now().add(const Duration(hours: 6, days: -3)),
-      to: DateTime.now().add(const Duration(hours: 7, days: -3)),
-      eventName: 'Support',
-      background: Colors.green,
-    ));
-    appointments.add(Meeting(
-      from: DateTime.now().add(const Duration(hours: 6, days: 2)),
-      to: DateTime.now().add(const Duration(hours: 7, days: 2)),
-      eventName: 'Retrospective',
-      background: Colors.purple,
     ));
 
     return MeetingDataSource(appointments);
@@ -216,18 +144,27 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
 }
 
 class Meeting {
-  Meeting(
-      {this.eventName,
-        this.from,
-        this.to,
-        this.background,
-        this.isAllDay = false});
+  Meeting({required this.from,
+    required this.to,
+    this.id,
+    this.recurrenceId,
+    this.eventName = '',
+    this.isAllDay = false,
+    this.background,
+    this.exceptionDates,
+    this.recurrenceRule});
 
-  String? eventName;
-  DateTime? from;
-  DateTime? to;
+  DateTime from;
+  DateTime to;
+  Object? id;
+  Object? recurrenceId;
+  String eventName;
+  bool isAllDay;
   Color? background;
-  bool? isAllDay;
+  String? fromZone;
+  String? toZone;
+  String? recurrenceRule;
+  List<DateTime>? exceptionDates;
 }
 
 class MeetingDataSource extends CalendarDataSource {
@@ -246,17 +183,37 @@ class MeetingDataSource extends CalendarDataSource {
   }
 
   @override
-  String getSubject(int index) {
-    return appointments![index].eventName;
+  Object? getId(int index) {
+    return appointments![index].id;
   }
 
   @override
-  bool isAllDay(int index) {
-    return appointments![index].isAllDay;
+  Object? getRecurrenceId(int index) {
+    return appointments![index].recurrenceId as Object?;
   }
 
   @override
   Color getColor(int index) {
-    return appointments![index].background;
+    return appointments![index].background as Color;
+  }
+
+  @override
+  List<DateTime>? getRecurrenceExceptionDates(int index) {
+    return appointments![index].exceptionDates as List<DateTime>?;
+  }
+
+  @override
+  String? getRecurrenceRule(int index) {
+    return appointments![index].recurrenceRule;
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].eventName as String;
+  }
+
+  @override
+  bool isAllDay(int index) {
+    return appointments![index].isAllDay as bool;
   }
 }
