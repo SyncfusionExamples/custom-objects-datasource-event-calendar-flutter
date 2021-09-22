@@ -35,41 +35,27 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           body: SafeArea(
-            child: SfCalendar(
-              view: CalendarView.week,
-              monthViewSettings: MonthViewSettings(showAgenda: true),
-              dataSource: _dataSource,
-              onTap: calendarTapped,
-            ),
-          )),
+        child: SfCalendar(
+          view: CalendarView.week,
+          monthViewSettings: MonthViewSettings(showAgenda: true),
+          dataSource: _dataSource,
+          onTap: calendarTapped,
+        ),
+      )),
     );
   }
 
   void calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.appointment ||
         details.targetElement == CalendarElement.agenda) {
-      Appointment? _appointment;
-      Meeting? _meeting;
-      if (details.appointments![0] is Appointment) {
-        _appointment = details.appointments![0];
-      } else {
-        _meeting = details.appointments![0];
-      }
+      final Meeting _meeting = details.appointments![0];
 
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Container(child: new Text('Appointment details')),
-              content: Text(_appointment != null
-                  ? _appointment.subject +
-                  "\nId: " +
-                  _appointment.id.toString() +
-                  "\nRecurrenceId: " +
-                  _appointment.recurrenceId.toString() +
-                  "\nAppointment type: " +
-                  _appointment.appointmentType.toString()
-                  : _meeting!.eventName +
+              content: Text(_meeting.eventName +
                   "\nId: " +
                   _meeting.id.toString() +
                   "\nRecurrenceId: " +
@@ -83,16 +69,6 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
               ],
             );
           });
-
-      /// To get the parent appointment of the recurrence appointment in the
-      /// custom object type, we can handle this with id of the appointment.
-      if (_appointment != null) {
-        for (int i = 0; i < _dataSource!.appointments!.length; i++) {
-          if (_appointment.id == _dataSource!.appointments![i].id) {
-            _meeting = _dataSource!.appointments![i];
-          }
-        }
-      }
     }
   }
 
@@ -144,15 +120,16 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
 }
 
 class Meeting {
-  Meeting({required this.from,
-    required this.to,
-    this.id,
-    this.recurrenceId,
-    this.eventName = '',
-    this.isAllDay = false,
-    this.background,
-    this.exceptionDates,
-    this.recurrenceRule});
+  Meeting(
+      {required this.from,
+      required this.to,
+      this.id,
+      this.recurrenceId,
+      this.eventName = '',
+      this.isAllDay = false,
+      this.background,
+      this.exceptionDates,
+      this.recurrenceRule});
 
   DateTime from;
   DateTime to;
@@ -167,7 +144,7 @@ class Meeting {
   List<DateTime>? exceptionDates;
 }
 
-class MeetingDataSource extends CalendarDataSource {
+class MeetingDataSource extends CalendarDataSource<Meeting> {
   MeetingDataSource(List<Meeting> source) {
     appointments = source;
   }
@@ -215,5 +192,21 @@ class MeetingDataSource extends CalendarDataSource {
   @override
   bool isAllDay(int index) {
     return appointments![index].isAllDay as bool;
+  }
+
+  @override
+  Meeting? convertAppointmentToObject(
+      Meeting? customData, Appointment appointment) {
+    // TODO: implement convertAppointmentToObject
+    return Meeting(
+        from: appointment.startTime,
+        to: appointment.endTime,
+        eventName: appointment.subject,
+        background: appointment.color,
+        isAllDay: appointment.isAllDay,
+        id: appointment.id,
+        recurrenceRule: appointment.recurrenceRule,
+        recurrenceId: appointment.recurrenceId,
+        exceptionDates: appointment.recurrenceExceptionDates);
   }
 }
