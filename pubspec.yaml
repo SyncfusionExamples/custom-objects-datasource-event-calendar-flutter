@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  syncfusion_flutter_calendar: 19.2.44
+  syncfusion_flutter_calendar: 19.3.43
   intl: ^0.17.0
 
 
