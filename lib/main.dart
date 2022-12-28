@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-void main() => runApp(CustomAppointmentDetails());
+void main() => runApp(const CustomAppointmentDetails());
 
 class CustomAppointmentDetails extends StatelessWidget {
+  const CustomAppointmentDetails({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: CustomAppointmentTapDetails(),
     );
@@ -16,6 +17,8 @@ class CustomAppointmentDetails extends StatelessWidget {
 }
 
 class CustomAppointmentTapDetails extends StatefulWidget {
+  const CustomAppointmentTapDetails({super.key});
+
   @override
   State<StatefulWidget> createState() => AppointmentDetails();
 }
@@ -35,37 +38,33 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           body: SafeArea(
-        child: SfCalendar(
-          view: CalendarView.week,
-          monthViewSettings: MonthViewSettings(showAgenda: true),
-          dataSource: _dataSource,
-          onTap: calendarTapped,
-        ),
-      )),
+            child: SfCalendar(
+              view: CalendarView.week,
+              monthViewSettings: const MonthViewSettings(showAgenda: true),
+              dataSource: _dataSource,
+              onTap: calendarTapped,
+            ),
+          )),
     );
   }
 
   void calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.appointment ||
         details.targetElement == CalendarElement.agenda) {
-      final Meeting _meeting = details.appointments![0];
+      final Meeting meeting = details.appointments![0];
 
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Container(child: new Text('Appointment details')),
-              content: Text(_meeting.eventName +
-                  "\nId: " +
-                  _meeting.id.toString() +
-                  "\nRecurrenceId: " +
-                  _meeting.recurrenceId.toString()),
+              title: Container(child: const Text('Appointment details')),
+              content: Text("${meeting.eventName}\nId: ${meeting.id}\nRecurrenceId: ${meeting.recurrenceId}"),
               actions: <Widget>[
-                new TextButton(
+                TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: new Text('close'))
+                    child: const Text('close'))
               ],
             );
           });
@@ -122,14 +121,14 @@ class AppointmentDetails extends State<CustomAppointmentTapDetails> {
 class Meeting {
   Meeting(
       {required this.from,
-      required this.to,
-      this.id,
-      this.recurrenceId,
-      this.eventName = '',
-      this.isAllDay = false,
-      this.background,
-      this.exceptionDates,
-      this.recurrenceRule});
+        required this.to,
+        this.id,
+        this.recurrenceId,
+        this.eventName = '',
+        this.isAllDay = false,
+        this.background,
+        this.exceptionDates,
+        this.recurrenceRule});
 
   DateTime from;
   DateTime to;
